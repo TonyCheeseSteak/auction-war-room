@@ -541,7 +541,7 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
   <section class="gsec"><h3>Top bar</h3>
     <dl>
       <dt>Most on one</dt><dd>The largest bid you can make while still leaving a dollar for every roster slot you haven't filled.</dd>
-      <dt>Room inflation</dt><dd>Money left across all 14 teams divided by sheet value left on the board. <b>Above 1.00 the room is holding cash</b>, everything remaining will cost more than Expected, and you should buy sooner. Below 1.00 there are bargains coming, so wait.</dd>
+      <dt>Room inflation</dt><dd>Money left across all 14 teams divided by the sheet value of the players who will actually still be bought. <b>Above 1.00 the room is holding cash</b>, everything remaining will cost more than Expected, and you should buy sooner. Below 1.00 there are bargains coming, so wait. Starts at 1.00 by construction. It holds back $28 for the kickers and defenses nobody bids on until the end, and it counts only the top 168 skill players left, since the room has 168 skill spots and the cheap tail of the board never gets drafted.</dd>
     </dl></section>
 
   <section class="gsec"><h3>Stars</h3>
@@ -731,10 +731,43 @@ function mine(){ return DATA.players.filter(p=>S.drafted[p.id]&&S.drafted[p.id].
 function spent(){ return mine().reduce((s,p)=>s+(S.drafted[p.id].price||0),0); }
 function roomSpent(){ return Object.values(S.drafted).reduce((s,d)=>s+(d.price||0),0); }
 function valueGone(){ return DATA.players.filter(p=>S.drafted[p.id]).reduce((s,p)=>s+p.exp,0); }
-function inflation(){ const left=(BUDGET*14)-roomSpent(), val=SHEET_TOTAL-valueGone();
-  return val<=0?1:left/ (val*14/ (SHEET_TOTAL||1)) /14*  (SHEET_TOTAL/ (SHEET_TOTAL)) || 1; }
-function infl(){ const moneyLeft=(BUDGET*14)-roomSpent(); const valLeft=(SHEET_TOTAL*14/14)-valueGone();
-  const base=(BUDGET*14)/SHEET_TOTAL; return valLeft<=0?1:(moneyLeft/valLeft)/base; }
+/* Room inflation.
+   Two leaks the naive money/value ratio misses:
+   1. K and DEF. 14 kickers + 14 defenses = 28 roster spots, ~$1 each, and no
+      kicker is on this 200-player board. That $28 is committed money that can
+      never chase a board player, so it comes out of the numerator.
+   2. The undraftable tail. The board lists 190 skill players but the room only
+      has 168 QB/RB/WR/TE spots. The cheapest ~22 never get bought, so their
+      sheet value must never sit in the denominator.
+   Both errors point the same way late: without them the board reads cheaper
+   than the room actually is, exactly when the last few dollars matter most. */
+const SKILL_SPOTS = 168;                 // 14 teams x (QB+2RB+2WR+TE+FLEX+5BN) - K/DEF
+const KDEF_SPOTS  = 28;                  // 14 K + 14 DEF, ~$1 apiece
+const SKILL = DATA.players.filter(p=>p.pos!=='DST');
+const SKILL_TOP = SKILL.slice().sort((a,b)=>b.exp-a.exp).slice(0,SKILL_SPOTS)
+                       .reduce((s,p)=>s+p.exp,0);
+/* The room holds $2772 of skill money but the sheet only prices those 168 seats
+   at $2698, so the sheet runs about 3% light in aggregate. ADJ rescales sheet
+   dollars to real dollars, which makes "the room paid what the board says" read
+   exactly 1.00 all draft instead of drifting hot as the pool shrinks. */
+const ADJ = ((BUDGET*14) - KDEF_SPOTS) / (SKILL_TOP||1);
+
+function infl(){
+  const dstGone = DATA.players.filter(p=>S.drafted[p.id]&&p.pos==='DST').length;
+  // kickers are invisible to us, so hold all $14; DEF releases as board DSTs go
+  const reserve = 14 + Math.max(0, 14 - dstGone);
+  const moneyLeft = Math.max(0, (BUDGET*14) - roomSpent() - reserve);
+
+  const skillGone = SKILL.filter(p=>S.drafted[p.id]).length;
+  const spotsLeft = Math.max(0, SKILL_SPOTS - skillGone);
+  const valLeft = SKILL.filter(p=>!S.drafted[p.id])
+                       .sort((a,b)=>b.exp-a.exp).slice(0,spotsLeft)
+                       .reduce((s,p)=>s+p.exp,0) * ADJ;
+
+  if(valLeft<=0) return 1;              // nothing left to price
+  // moneyLeft of 0 correctly reads ~0: the room is tapped and everyone goes $1
+  return Math.min(4, moneyLeft/valLeft);
+}
 
 function needs(){
   const have=mine(), c={QB:0,RB:0,WR:0,TE:0};

@@ -87,6 +87,13 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
 .chip.on-acc[aria-pressed="true"]{background:var(--accent);color:#fff}
 
 /* ---------- layout ---------- */
+/* .wrap sets display:grid, which out-ranks the UA sheet's [hidden]{display:none}.
+   Without this the board stayed painted over the Sleepers and Depth views. */
+[hidden]{display:none!important}
+.themebtn{width:32px;height:32px;border-radius:8px;border:1px solid var(--line);
+  background:var(--surface);color:var(--ink-2);font-size:15px;line-height:1;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;flex:none;transition:background .12s,color .12s}
+.themebtn:hover{background:var(--surface-2);color:var(--ink)}
 .wrap{max-width:1560px;margin:0 auto;padding:18px 20px 60px;display:grid;
   grid-template-columns:minmax(0,1fr) 332px;gap:20px;align-items:start}
 @media(max-width:1100px){.wrap{grid-template-columns:1fr}}
@@ -461,6 +468,7 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
     <div class="bar-top">
       <div class="brand">Auction War Room<small>Travis's Super Bowl Challenge &middot; 14 teams &middot; half PPR</small></div>
       <nav class="nav" id="nav"></nav>
+      <button class="themebtn" id="theme" type="button" title="Light / dark / match system"><span id="themeIcon">◐</span></button>
       <span class="synced" id="sync" data-state="local">This device only</span>
       <div class="stats" id="stats"></div>
     </div>
@@ -1314,6 +1322,27 @@ function setSync(state,extra){ const n=$('#sync');
       S.starR=R; S.starC=C; save(); render();
     });
   }catch(e){ setSync('local','Sync failed to start: '+e.message); }
+})();
+
+/* Theme. The page follows the OS by default; this cycles system -> light -> dark
+   and remembers the choice per browser. Wrapped because storage throws in some
+   privacy contexts and a draft board must still paint if it does. */
+(function theme(){
+  const btn=document.getElementById('theme'), icon=document.getElementById('themeIcon');
+  if(!btn) return;
+  const ICON={system:'\u25D0', light:'\u2600', dark:'\u263E'};
+  const LABEL={system:'Matching your system', light:'Light', dark:'Dark'};
+  let mode='system';
+  try{ mode=localStorage.getItem('ffTheme')||'system'; }catch(e){}
+  function paint(){
+    if(mode==='system') document.documentElement.removeAttribute('data-theme');
+    else document.documentElement.setAttribute('data-theme',mode);
+    icon.textContent=ICON[mode]; btn.title=LABEL[mode]+' \u2014 click to change';
+  }
+  btn.onclick=()=>{ mode = mode==='system'?'light':mode==='light'?'dark':'system';
+    try{ localStorage.setItem('ffTheme',mode); }catch(e){}
+    paint(); };
+  paint();
 })();
 </script>
 

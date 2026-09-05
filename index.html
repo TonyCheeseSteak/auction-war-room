@@ -177,6 +177,8 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
 .mv b{font-size:23px;font-weight:600;display:block}
 .mv span{font-size:9px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);display:block;margin-top:0}
 .mv.max b{color:var(--accent)}
+.mv.sub b{font-size:19px;font-weight:600;color:var(--ink-2)}
+.mv.wa b{color:var(--warn)}
 .mv.range{grid-column:1/-1;border-top:1px solid var(--rule);padding-top:3px;margin-top:3px}
 .mv.range b{font-size:12.5px;font-weight:500;color:var(--ink-2)}
 .draft{display:flex;flex-direction:column;gap:2px;width:76px}
@@ -491,7 +493,7 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
 
   <section class="gsec"><h3>The three prices</h3>
     <dl>
-      <dt>Our max</dt><dd>What he's worth to <b>your</b> roster right now, given the money you have left and the slots you still need. Recalculates after every pick. Above this number, walking away is the better outcome.</dd>
+            <dt>Walk away</dt><dd>The most we should pay, from the plan. It's the tighter of what the plan budgets for your next open seat at that position (RB1 $52, RB2 $50, flex RB $28, WR1 $46, WR2 $9, QB and TE $14) and the <b>only under $X</b> line for tiers we're not shopping in. Updates as you fill slots and spend. <b>Above this number, walking away is the better outcome.</b></dd>
       <dt>Expected</dt><dd>What the room will probably pay. Built from what your league actually spent in 2024 and 2025, grouped by tier. Blind to injuries and busts on purpose — it predicts the bidding, not the season.</dd>
       <dt>Tier range</dt><dd>The price band across that player's whole tier. Tells you whether he sits at the top or the bottom of his group. Two players in the same tier are close to interchangeable, so the cheaper one is usually the buy.</dd>
     </dl></section>
@@ -782,18 +784,38 @@ function needs(){
   have.forEach(p=>{ if(c[p.pos]!=null)c[p.pos]++; });
   return {QB:Math.max(0,1-c.QB), RB:Math.max(0,3-c.RB), WR:Math.max(0,2-c.WR), TE:Math.max(0,1-c.TE)};
 }
-function maxBid(p){
+/* Walk-away price.
+   Not a model. This is the Draft Plan's own ceilings, per player, made explicit
+   at the moment you are bidding instead of sitting in the tier banner above.
+
+   Two constraints, whichever is tighter:
+   1. SLOT — what the plan budgets for the next open seat at that position.
+      RB1 $52, RB2 $50, flex RB $28. WR1 $46, WR2 $9. QB and TE $14. Then bench.
+   2. TIER — the "only under $X" line for tiers the plan is not shopping in.
+      Set for every tier, including the ones we buy in, so a cheap-tier name
+      can never inherit an expensive slot's number.
+   Then capped by cash on hand, holding $1 for every other empty seat. */
+const SLOT_CAP = { RB:[52,50,28], WR:[46,9], QB:[14], TE:[14], DST:[2] };
+const BENCH_CAP = 4;
+const TIER_CAP = {1:54, 2:50, 3:52, 4:32, 5:28, 6:25, 7:16, 8:17, 9:10, 10:13,
+                  11:10, 12:14, 13:9, 14:4, 15:4, 16:4, 17:4,
+                  18:2, 19:2, 20:2, 21:2, 22:2, 23:2, 24:2, 25:2};
+
+function walkAway(p){
   if(S.drafted[p.id]) return null;
   const openSlots = ROSTER_N - mine().length;
   if(openSlots<=0) return 0;
-  const cap = BUDGET - spent() - (openSlots-1);          // must leave $1 a slot
-  if(cap<=0) return 0;
-  const need = needs()[p.pos]||0;
-  const targeted = (DATA.targetTiers[p.pos]||[]).includes(p.tier);
-  let v = p.hi;
-  if(need>0 && targeted) v = Math.round(p.hi*1.12);
-  else if(need===0)      v = Math.round(p.exp*0.75);
-  return Math.max(1, Math.min(cap, v));
+  const cashCap = BUDGET - spent() - (openSlots-1);   // leave $1 a seat
+  if(cashCap<=0) return 0;
+
+  const owned = mine().filter(x=>x.pos===p.pos).length;
+  const ladder = SLOT_CAP[p.pos] || [BENCH_CAP];
+  const slotCap = owned < ladder.length ? ladder[owned] : BENCH_CAP;
+
+  const tierCap = TIER_CAP[p.tier];
+  let v = slotCap;
+  if(tierCap != null) v = Math.min(v, tierCap);
+  return Math.max(1, Math.min(cashCap, v));
 }
 const PILL={'Every Week':'every','Steady Floor':'steady','Boom or Bust':'boom','Weekly Liability':'liab'};
 
@@ -989,10 +1011,9 @@ function row(p){
   }
   r.append(strip);
 
-  const mb=maxBid(p);
   const m=el('div','money');
-  m.innerHTML='<div class="mv max"><b>'+(d?'—':money(mb))+'</b><span>Our max</span></div>'+
-    '<div class="mv"><b>'+money(p.exp)+'</b><span>Expected</span></div>'+
+  m.innerHTML='<div class="mv max"><b>'+money(p.exp)+'</b><span>Expected</span></div>'+
+    '<div class="mv sub'+(d?'':' wa')+'"><b>'+(d?'—':money(walkAway(p)))+'</b><span>Walk away</span></div>'+
     '<div class="mv range"><b>T'+p.tier+' &nbsp;$'+(DATA.tiers[p.tier]?DATA.tiers[p.tier].lo:p.lo)+'–'+(DATA.tiers[p.tier]?DATA.tiers[p.tier].hi:p.hi)+'</b><span>Tier range</span></div>';
   r.append(m);
 

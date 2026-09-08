@@ -735,7 +735,7 @@ function variance(){
   return {paid,plan,diff:paid-plan,n};
 }
 const SHEET_TOTAL = DATA.players.reduce((s,p)=>s+p.exp,0);
-const LS='wr2026';
+const LS='ffTC2026';
 let S = {drafted:{}, starR:{}, starC:{}, open:null, pos:'ALL', misc:{}, q:''};
 try{ const r=localStorage.getItem(LS); if(r) S=Object.assign(S,JSON.parse(r)); }catch(e){}
 const save=()=>{ try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){} };

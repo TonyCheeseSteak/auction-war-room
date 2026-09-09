@@ -462,6 +462,18 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
 .gpill{display:inline-block;font-size:10.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;
   padding:3px 9px;border-radius:12px;margin-right:7px;vertical-align:1px}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+.psec{margin:26px 0}
+.psec h2{font-family:var(--cond);font-size:22px;letter-spacing:.02em;margin:0 0 4px}
+.psub{color:var(--muted);font-size:13px;margin:0 0 10px}
+.ptab{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:13px}
+.ptab th{text-align:left;font-family:var(--ui);font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--rule);padding:5px 8px}
+.ptab td{padding:5px 8px;border-bottom:1px solid var(--rule)}
+.ptab tr.good td{background:var(--good-bg)}
+.ptab tr.bad td{background:var(--bad-bg)}
+.pnote{font-size:13px;color:var(--ink-2);margin-top:10px;line-height:1.5}
+.prules{padding-left:20px;line-height:1.65;font-size:14px}
+.prules li{margin-bottom:8px}
 </style>
 </head>
 <body>
@@ -572,112 +584,72 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
 </div>
 
 <div class="planwrap" id="viewPlan" hidden>
-  <section class="thesis">
-    <h1>Two tier-3 backs. Everything else is rounding.</h1>
-    <p>Running back is the only position on this board with a real drop-off. Receivers are deep enough that
-       your $7 guy is close to someone else's $45 guy. Quarterback and tight end land within a point a week of
-       optimal no matter what you do. Spend where the slope is.</p>
+  <h1>Buy backs and a quarterback.<br>Receivers are flat.</h1>
+  <p class="lede">Ten teams and full PPR change everything. Replacement is RB25 and WR25, and both are startable, so the only question is where the slope is steep. It is steep at running back, surprisingly steep at the top of quarterback, and almost flat across receiver.</p>
+
+  <section class="psec">
+    <h2>Points above replacement, per dollar</h2>
+    <p class="psub">Computed from 2025 under this league's scoring: full PPR, 5-point passing TDs, no yardage bonuses.</p>
+    <table class="ptab">
+      <thead><tr><th>Position</th><th>Rank</th><th>Avg $</th><th>Over replacement</th><th>Pts per $</th></tr></thead>
+      <tbody>
+        <tr class="good"><td>RB</td><td>1-3</td><td>$54</td><td>+212</td><td><b>3.93</b></td></tr>
+        <tr class="good"><td>RB</td><td>4-8</td><td>$40</td><td>+137</td><td><b>3.47</b></td></tr>
+        <tr class="good"><td>QB</td><td>1-3</td><td>$18</td><td>+61</td><td><b>3.39</b></td></tr>
+        <tr><td>RB</td><td>9-15</td><td>$28</td><td>+76</td><td>2.70</td></tr>
+        <tr><td>WR</td><td>1-3</td><td>$57</td><td>+147</td><td>2.58</td></tr>
+        <tr><td>TE</td><td>1-3</td><td>$28</td><td>+62</td><td>2.21</td></tr>
+        <tr><td>TE</td><td>4-8</td><td>$7</td><td>+15</td><td>2.12</td></tr>
+        <tr><td>WR</td><td>4-8</td><td>$45</td><td>+75</td><td>1.68</td></tr>
+        <tr><td>QB</td><td>4-8</td><td>$11</td><td>+18</td><td>1.61</td></tr>
+        <tr class="bad"><td>WR</td><td>9-15</td><td>$27</td><td>+27</td><td>1.01</td></tr>
+        <tr class="bad"><td>WR</td><td>16-25</td><td>$20</td><td>+9</td><td>0.43</td></tr>
+      </tbody>
+    </table>
+    <p class="pnote"><b>Receivers between $20 and $45 are where money goes to die.</b> WR16-25 costs $20 and returns nine points over a guy you can have for a dollar.</p>
   </section>
 
-  <section class="pcard shop">
-    <h2>Shopping list</h2>
-    <p class="sub">Every slot, who fills it, and the price you walk away at. Greys out as players go.</p>
-    <div class="shoplist" id="shopList"></div>
-  </section>
-
-  <section class="pcard">
-    <h2>The roster plan</h2>
-    <p class="sub">Fills in live as you draft. Target ranges come from the optimiser.</p>
-    <div class="ptable" id="planSlots"></div>
-  </section>
-
-  <div class="ptwo">
-    <section class="pcard">
-      <h2>Where the money goes</h2>
-      <div class="split" id="planSplit"></div>
-      <p class="foot">Three independent methods all landed on RB between $110 and $118, receivers between
-        $47 and $51, and the flex on a running back.</p>
-    </section>
-
-    <section class="pcard">
-      <h2>By tier</h2>
-      <table class="tt">
-        <thead><tr><th>Tier</th><th>Players</th><th>Spend</th><th>Share</th></tr></thead>
-        <tbody>
-          <tr class="skip"><td>1&ndash;2</td><td>none</td><td>$0</td><td>0%</td></tr>
-          <tr class="hit"><td>3</td><td>3 &mdash; two RB, one WR</td><td>$134</td><td>67%</td></tr>
-          <tr class="hit"><td>5</td><td>1 &mdash; RB in the flex</td><td>$28</td><td>14%</td></tr>
-          <tr><td>12&ndash;13</td><td>3 &mdash; WR2, TE, QB</td><td>$25</td><td>13%</td></tr>
-          <tr><td>15+</td><td>7 &mdash; bench, K, DEF</td><td>$13</td><td>6%</td></tr>
-        </tbody>
-      </table>
-    </section>
-  </div>
-
-  <section class="pcard">
-    <h2>Skip tiers 1 and 2</h2>
-    <p class="lede">This is the decision the whole plan rests on. Tier 1 backs cost $70&ndash;72. Tier 3 backs
-      cost $40&ndash;46 and there are <b>five of them</b>. The points gap does not cover a $26 price gap, and
-      with five bodies in tier 3 you are going to land one.</p>
-    <div class="cmp" id="planCmp"></div>
-  </section>
-
-  <section class="pcard">
-    <h2>Live rules</h2>
-    <ol class="rules">
-      <li><b>Let tiers 1 and 2 go.</b> Every dollar someone spends on Gibbs is a dollar they cannot spend in
-          tier 3, where you are shopping.</li>
-      <li><b>You need two of the five tier-3 backs.</b> Walk away at $52 on the first and $50 on the second.
-          If four are gone and you have none, pay up to $58 for the last one. Hampton at $41 up to Saquon at $44
-          is the single best three dollars on the board.</li>
-      <li><b>One receiver in the $40&ndash;46 band, then shop the $19 shelf.</b> WR12 up to WR8 is the best
-          upgrade on the whole board at 1.81 points per extra dollar. Above WR8 it collapses to 0.99, and
-          WR1 over WR3 buys literally nothing for $5. WR14 through WR19 are all priced $28 and sit within a
-          point of each other &mdash; inside that band take whoever is cheapest.</li>
-      <li><b>QB and TE are afterthoughts.</b> Anything top-12 at QB, top-8 at TE, cheapest available, $14 max each.
-          Do not bid $28 on Josh Allen.</li>
-      <li><b>Nominate players you do not want, early.</b> Your plan needs the room's money drained out of
-          tiers 1 and 2 before tier 3 clears.</li>
-      <li><b>Keep $13 back for the endgame.</b> Not $2.</li>
+  <section class="psec">
+    <h2>The four rules</h2>
+    <ol class="prules">
+      <li><b>Buy a top-8 running back, $40 to $58.</b> Best rate on the board. RB1 scores 375, RB25 scores 163, and that gap is the single biggest edge available to you.</li>
+      <li><b>Take a top-3 quarterback if he goes under $20.</b> This is the opposite of your other league. 5-point passing TDs with no bonuses keeps the top QBs separated. Third best rate on the board. Do not chase past $20, the tier below drops to 1.61.</li>
+      <li><b>One receiver, then stop.</b> Take a top-8 WR only if he comes cheap. After that the position is flat, so fill from the $8 shelf and spend the difference on your second back.</li>
+      <li><b>Tight end: $28 for a top-3, or $7 for a top-8.</b> Nothing in between. TE9 and below sit under replacement, so the middle of that position is waste.</li>
     </ol>
   </section>
 
-  <section class="pcard">
-    <h2>What each upgrade actually buys</h2>
-    <p class="lede">Expected points gained by stepping up one rung, against what that step costs.
-      This is the arithmetic the whole plan runs on, so it is here to be argued with.</p>
-    <table class="tt up">
-      <thead><tr><th>Step up</th><th>Gain</th><th>Cost</th><th>Pts per $</th></tr></thead>
-      <tbody>
-        <tr class="hit"><td>RB10 &rarr; RB7</td><td>+18</td><td>+$3</td><td>5.88</td></tr>
-        <tr class="hit"><td>WR12 &rarr; WR8</td><td>+29</td><td>+$16</td><td>1.81</td></tr>
-        <tr><td>RB7 &rarr; RB6</td><td>+3</td><td>+$2</td><td>1.43</td></tr>
-        <tr><td>WR22 &rarr; WR12</td><td>+13</td><td>+$9</td><td>1.44</td></tr>
-        <tr><td>WR5 &rarr; WR3</td><td>+9</td><td>+$8</td><td>1.14</td></tr>
-        <tr><td>WR8 &rarr; WR5</td><td>+10</td><td>+$10</td><td>0.99</td></tr>
-        <tr class="skip"><td>RB6 &rarr; RB3</td><td>+11</td><td>+$12</td><td>0.91</td></tr>
-        <tr class="skip"><td>RB13 &rarr; RB10</td><td>+8</td><td>+$13</td><td>0.64</td></tr>
-        <tr class="skip"><td>RB3 &rarr; RB1</td><td>+8</td><td>+$14</td><td>0.55</td></tr>
-        <tr class="skip"><td>WR3 &rarr; WR1</td><td>+0</td><td>+$5</td><td>0.00</td></tr>
-      </tbody>
-    </table>
-    <p class="foot">Green rows are the upgrades worth paying for. Struck rows are the ones that look like
-      an upgrade and are not &mdash; including every step above RB6 and WR5.</p>
+  <section class="psec">
+    <h2>Shopping list</h2>
+    <p class="psub">Every slot, who fills it, and where you walk. Greys out as players go.</p>
+    <div id="shopList"></div>
   </section>
 
-  <section class="pcard">
-    <h2>If it goes sideways</h2>
-    <dl class="conting">
-      <dt>Tier-3 backs going for $55+</dt>
-      <dd>Take one, pivot the second RB slot to tier 5, put the savings into a second tier-3 receiver. Costs about 20 points.</dd>
-      <dt>You end up with no tier-3 back at all</dt>
-      <dd>Buy three tier 5&ndash;6 backs instead of two. Volume at the position beats quality at another one.</dd>
-      <dt>Someone else is running this same plan</dt>
-      <dd>Tier 3 will inflate. Go earlier and harder on the first one rather than getting shut out.</dd>
-      <dt class="never">Never do this</dt>
-      <dd class="never">Spend under $60 total on running backs. Zero RB costs 73 points and is the only genuinely
-          losing build on this board.</dd>
-    </dl>
+  <section class="psec">
+    <h2>The roster plan</h2>
+    <p class="psub">Fills in live as you draft. 15 seats, six of them bench.</p>
+    <div id="planSlots"></div>
+    <div id="planSplit"></div>
+    <div id="planCmp"></div>
+  </section>
+
+  <section class="psec">
+    <h2>Where the $200 goes</h2>
+    <table class="ptab">
+      <thead><tr><th>Slot</th><th>Target</th><th>Walk away</th></tr></thead>
+      <tbody>
+        <tr><td>RB1</td><td>$50</td><td>$58</td></tr>
+        <tr><td>RB2</td><td>$28</td><td>$32</td></tr>
+        <tr><td>WR1</td><td>$45</td><td>$58</td></tr>
+        <tr><td>WR2</td><td>$16</td><td>$34</td></tr>
+        <tr><td>QB</td><td>$18</td><td>$20</td></tr>
+        <tr><td>TE</td><td>$7</td><td>$15</td></tr>
+        <tr><td>FLEX</td><td>$14</td><td>$18</td></tr>
+        <tr><td>K + DEF</td><td>$2</td><td>$2</td></tr>
+        <tr><td>6 bench</td><td>$20</td><td>$3 each</td></tr>
+      </tbody>
+    </table>
+    <p class="pnote">Prices here are consensus values adjusted for this format, not this room's history. If the first ten nominations all clear their Expected by 20%, add that to everything and wait for the bargains that follow.</p>
   </section>
 </div>
 
